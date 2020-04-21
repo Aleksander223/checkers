@@ -15,6 +15,8 @@ PIECE_OFFSET = (TILE_SIZE - PIECE_SIZE)
 
 redPNG = pygame.image.load("./res/red.png").convert_alpha()
 bluePNG = pygame.image.load("./res/blue.png").convert_alpha()
+redKingPNG = pygame.image.load("./res/red_king.png").convert_alpha()
+blueKingPNG = pygame.image.load("./res/blue_king.png").convert_alpha()
 
 # sprites
 spr_tiles = pygame.sprite.Group()
@@ -39,18 +41,25 @@ class Tile(pygame.sprite.Sprite):
         spr_tiles.add(self)
 
 class Piece(pygame.sprite.Sprite):
-    def __init__(self, x, y, color, i, j):
+    def __init__(self, x, y, color, i, j, king=False):
         pygame.sprite.Sprite.__init__(self)
 
         self.color = color
 
         self.i = i
         self.j = j
+        self.king = king
 
         if (color == "red"):
-            self.image = redPNG
+            if (king):
+                self.image = redKingPNG
+            else:
+                self.image = redPNG
         elif (color == "blue"):
-            self.image = bluePNG
+            if (king):
+                self.image = blueKingPNG
+            else:
+                self.image = bluePNG
 
         self.rect = self.image.get_rect()
 
@@ -85,6 +94,10 @@ def renderBoardFromState():
                 reds.append( Piece(TILE_OFFSET + j * (PIECE_SIZE + PIECE_OFFSET), TILE_OFFSET + i * (PIECE_SIZE + PIECE_OFFSET), "red", i, j) )
             elif (game.board[i][j] == game.BLUE_SYMBOL):
                 blues.append( Piece(TILE_OFFSET + j * (PIECE_SIZE + PIECE_OFFSET), TILE_OFFSET + i * (PIECE_SIZE + PIECE_OFFSET), "blue", i, j) )
+            elif (game.board[i][j] == game.RED_KING_SYMBOL):
+                reds.append( Piece(TILE_OFFSET + j * (PIECE_SIZE + PIECE_OFFSET), TILE_OFFSET + i * (PIECE_SIZE + PIECE_OFFSET), "red", i, j, king = True) )
+            elif (game.board[i][j] == game.BLUE_KING_SYMBOL):
+                blues.append( Piece(TILE_OFFSET + j * (PIECE_SIZE + PIECE_OFFSET), TILE_OFFSET + i * (PIECE_SIZE + PIECE_OFFSET), "blue", i, j, king = True) )
 
 white = True
 for i in range(8):
@@ -137,13 +150,23 @@ while True:
                     print("Clicked on red piece ", red.i, red.j)
                     i_lastClicked = red.i
                     j_lastClicked = red.j
-                    sym_lastClicked = 'r'
+
+                    if (red.king):
+                        sym_lastClicked = 'R'
+                    else:
+                        sym_lastClicked = 'r'
+
             for blue in blues:
                 if blue.rect.collidepoint(x, y):
                     print("Clicked on blue piece", blue.i, blue.j)
                     i_lastClicked = blue.i
                     j_lastClicked = blue.j
-                    sym_lastClicked = 'b'
+
+                    if (blue.king):
+                        sym_lastClicked = 'B'
+                    else:
+                        sym_lastClicked = 'b'
+
             for tile in tiles:
                 if tile.rect.collidepoint(x, y):
                     if (tile.i == i_lastClicked and tile.j == j_lastClicked):
@@ -152,13 +175,16 @@ while True:
                     print("Clicked on tile", tile.i, tile.j)
 
                     if(i_lastClicked != -1 and j_lastClicked != -1 and sym_lastClicked != ""):
-                        game.move(i_lastClicked, j_lastClicked, tile.i, tile.j, sym_lastClicked)
+                        try:
+                            game.move(i_lastClicked, j_lastClicked, tile.i, tile.j, sym_lastClicked)
+                        except Exception as E:
+                            print("Error:", E)
+
 
                     madeMove = True
 
                     i_lastClicked = -1
                     j_lastClicked = -1
-                    sym_lastClicked = ""
 
 
     # update
