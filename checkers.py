@@ -69,7 +69,6 @@ class Board:
                 else:
                     eatY=  endY + 1
 
-
         elif (symbol == BLUE_SYMBOL):
             if (endX != startX - 1 or  not(endY == startY + 1 or endY == startY - 1)):
                 # check if eating a piece
@@ -91,12 +90,49 @@ class Board:
                 else:
                     eatY=  endY + 1
 
+        elif (symbol == RED_KING_SYMBOL or symbol == BLUE_KING_SYMBOL):
+            if (not(endX == startX + 1 or endX == startX - 1) or not(endY == startY + 1 or endY == startY - 1)):
+                # check if eating a piece
+                if not(endX == startX + 2 or endX == startX - 2):
+                    raise Exception("Illegal move")
+
+                # forward
+                if not(self.isOpponent(startX + 1, startY - 1, symbol) or self.isOpponent(startX + 1, startY + 1, symbol)):
+                    raise Exception("Illegal move")
+
+                # backward
+                if not(self.isOpponent(startX - 1, startY - 1, symbol) or self.isOpponent(startX - 1, startY + 1, symbol)):
+                    raise Exception("Illegal move")
+
+                if not(endY == startY - 2 or endY == startY + 2):
+                    raise Exception("Illegal move")
+
+                eatingPiece = True
+
+                if (endX > startX):
+                    eatX = startX + 1
+                else:
+                    eatX = startX - 1
+
+                if (endY > startY):
+                    eatY = endY - 1
+                else:
+                    eatY=  endY + 1
+
 
         self.board[endX][endY] = self.board[startX][startY]
         self.board[startX][startY] = BLANK_SYMBOL
 
         if (eatingPiece):
             self.board[eatX][eatY] = BLANK_SYMBOL
+
+        # red upgrade
+        if (symbol == RED_SYMBOL and endX == BOARD_SIZE - 1):
+            self.board[endX][endY] = RED_KING_SYMBOL
+
+        # blue upgrade
+        if (symbol == BLUE_SYMBOL and endX == 0):
+            self.board[endX][endY] = BLUE_KING_SYMBOL
 
 
     def print(self):
