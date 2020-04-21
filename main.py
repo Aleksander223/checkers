@@ -8,7 +8,7 @@ pygame.display.set_caption("Checkers")
 
 # constants
 TILE_SIZE = 60
-TILE_OFFSET = 100
+TILE_OFFSET = 120
 
 PIECE_SIZE = 40
 PIECE_OFFSET = (TILE_SIZE - PIECE_SIZE)
@@ -22,6 +22,22 @@ blueKingPNG = pygame.image.load("./res/blue_king.png").convert_alpha()
 spr_tiles = pygame.sprite.Group()
 spr_red = pygame.sprite.Group()
 spr_blue = pygame.sprite.Group()
+
+# fonts
+font = pygame.font.SysFont('arial', 32)
+
+# texts
+error_text = font.render('', True, (0, 0, 0))
+error_rect = error_text.get_rect()
+error_rect = (88, 20)
+
+blue_text = font.render('BLUE moves', True, (41, 88, 170))
+blue_rect = blue_text.get_rect()
+blue_rect = (300, 20)
+
+red_text = font.render('RED moves', True, (234, 43, 31))
+red_rect = red_text.get_rect()
+red_rect = (300, 20)
 
 # classes
 class Tile(pygame.sprite.Sprite):
@@ -79,6 +95,8 @@ game = checkers.Board()
 tiles = []
 reds = []
 blues = []
+
+blue_moves = False
 
 def renderBoardFromState():
     # clear pieces
@@ -146,7 +164,7 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             for red in reds:
-                if red.rect.collidepoint(x, y):
+                if red.rect.collidepoint(x, y) and not blue_moves:
                     print("Clicked on red piece ", red.i, red.j)
                     i_lastClicked = red.i
                     j_lastClicked = red.j
@@ -157,7 +175,7 @@ while True:
                         sym_lastClicked = 'r'
 
             for blue in blues:
-                if blue.rect.collidepoint(x, y):
+                if blue.rect.collidepoint(x, y) and blue_moves:
                     print("Clicked on blue piece", blue.i, blue.j)
                     i_lastClicked = blue.i
                     j_lastClicked = blue.j
@@ -174,14 +192,21 @@ while True:
 
                     print("Clicked on tile", tile.i, tile.j)
 
+                    error_text = font.render('', True, (0, 0, 0))
+                    error_rect = error_text.get_rect()
+                    error_rect = (88, 20)
+
                     if(i_lastClicked != -1 and j_lastClicked != -1 and sym_lastClicked != ""):
                         try:
                             game.move(i_lastClicked, j_lastClicked, tile.i, tile.j, sym_lastClicked)
+                            madeMove = True
                         except Exception as E:
                             print("Error:", E)
 
+                            error_text = font.render(str(E), True, (0, 0, 0))
+                            error_rect = error_text.get_rect()
+                            error_rect = (88, 20)
 
-                    madeMove = True
 
                     i_lastClicked = -1
                     j_lastClicked = -1
@@ -193,10 +218,19 @@ while True:
         game.print()
         madeMove = False
 
+        blue_moves = not blue_moves
+
     # render
     screen.fill((190, 175, 175))
     spr_tiles.draw(screen)
     spr_red.draw(screen)
     spr_blue.draw(screen)
+
+    screen.blit(error_text, error_rect)
+
+    if (blue_moves):
+        screen.blit(blue_text, blue_rect)
+    else:
+        screen.blit(red_text, red_rect)
 
     pygame.display.flip()
