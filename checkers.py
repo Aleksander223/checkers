@@ -9,6 +9,15 @@ BLANK_SYMBOL = '.'
 class Board:
     def __init__(self):
         self.board = [[ BLANK_SYMBOL for i in range(BOARD_SIZE) ] for j in range (BOARD_SIZE)]
+        self.BOARD_SIZE = BOARD_SIZE
+
+        self.RED_SYMBOL = RED_SYMBOL
+        self.BLUE_SYMBOL = BLUE_SYMBOL
+
+        self.RED_KING_SYMBOL = RED_KING_SYMBOL
+        self.BLUE_KING_SYMBOL = BLUE_KING_SYMBOL
+
+        self.BLANK_SYMBOL = BLANK_SYMBOL
 
         for i in range(BOARD_SIZE):
             for j in range(BOARD_SIZE):
@@ -150,31 +159,28 @@ class Board:
                 print(self.board[i][j], end=' ')
             print()
 
-
-board = Board()
-
-while(True):
-    board.print()
-
-    choice = input("Type quit if you want to quit, else just enter: ")
-    if choice == "quit":
-        # score
-        break
-
-    sym = input("Symbol: ")
-    print(sym, "| New move (i, j) -> (x, y)")
-
-    try:
-        i = int(input("i: "))
-        j = int(input("j: "))
-        x = int(input("x: "))
-        y = int(input("y: "))
-
-    except Exception as E:
-        print("Invalid format, try again\n")
-        continue
-
-    try:
-        board.move(i, j, x, y, sym)
-    except Exception as E:
-        print("Error:", E)
+# while(True):
+#     board.print()
+#
+#     choice = input("Type quit if you want to quit, else just enter: ")
+#     if choice == "quit":
+#         # score
+#         break
+#
+#     sym = input("Symbol: ")
+#     print(sym, "| New move (i, j) -> (x, y)")
+#
+#     try:
+#         i = int(input("i: "))
+#         j = int(input("j: "))
+#         x = int(input("x: "))
+#         y = int(input("y: "))
+#
+#     except Exception as E:
+#         print("Invalid format, try again\n")
+#         continue
+#
+#     try:
+#         board.move(i, j, x, y, sym)
+#     except Exception as E:
+#         print("Error:", E)

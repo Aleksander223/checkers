@@ -1,4 +1,5 @@
 import pygame
+import checkers
 
 pygame.init()
 
@@ -9,7 +10,8 @@ pygame.display.set_caption("Checkers")
 TILE_SIZE = 60
 TILE_OFFSET = 100
 
-PIECE_SIZE = 60
+PIECE_SIZE = 40
+PIECE_OFFSET = (TILE_SIZE - PIECE_SIZE)
 
 redPNG = pygame.image.load("./res/red.png").convert_alpha()
 bluePNG = pygame.image.load("./res/blue.png").convert_alpha()
@@ -37,10 +39,13 @@ class Tile(pygame.sprite.Sprite):
         spr_tiles.add(self)
 
 class Piece(pygame.sprite.Sprite):
-    def __init__(self, x, y, color):
+    def __init__(self, x, y, color, i, j):
         pygame.sprite.Sprite.__init__(self)
 
         self.color = color
+
+        self.i = i
+        self.j = j
 
         if (color == "red"):
             self.image = redPNG
@@ -58,37 +63,63 @@ class Piece(pygame.sprite.Sprite):
             spr_blue.add(self)
 
 
+
 # board init
-white = True
+# logic board
+game = checkers.Board()
 tiles = []
+reds = []
+blues = []
+
+def renderBoardFromState():
+    # clear pieces
+    spr_red.empty()
+    spr_blue.empty()
+
+    reds.clear()
+    blues.clear()
+
+    for i in range(game.BOARD_SIZE):
+        for j in range(game.BOARD_SIZE):
+            if (game.board[i][j] == game.RED_SYMBOL):
+                reds.append( Piece(TILE_OFFSET + j * (PIECE_SIZE + PIECE_OFFSET), TILE_OFFSET + i * (PIECE_SIZE + PIECE_OFFSET), "red", i, j) )
+            elif (game.board[i][j] == game.BLUE_SYMBOL):
+                blues.append( Piece(TILE_OFFSET + j * (PIECE_SIZE + PIECE_OFFSET), TILE_OFFSET + i * (PIECE_SIZE + PIECE_OFFSET), "blue", i, j) )
+
+white = True
 for i in range(8):
     for j in range(8):
         if white:
-            color = (255, 255, 255)
+            color = (255, 238, 187)
         else:
-            color = (0, 0, 0)
+            color = (85, 136, 34)
         white = not white
         tiles.append( Tile(TILE_OFFSET + j * TILE_SIZE, TILE_OFFSET + i * TILE_SIZE, color, i, j) )
 
     # to stagger the tiles
     white = not white
 
-# pieces
-# red
-reds = []
-for i in range(3):
-    for j in range(8):
-        if (i % 2 != j % 2):
-            reds.append( Piece(TILE_OFFSET + j * PIECE_SIZE, TILE_OFFSET + i * PIECE_SIZE, "red") )
+# # pieces
+# # red
+#
+# for i in range(3):
+#     for j in range(8):
+#         if (i % 2 != j % 2):
+#
+#
+# # blue
+#
+# for i in range(5, 8):
+#     for j in range(8):
+#         if (i % 2 != j % 2):
 
-# blue
-blues = []
-for i in range(5, 8):
-    for j in range(8):
-        if (i % 2 != j % 2):
-            blues.append( Piece(TILE_OFFSET + j * PIECE_SIZE, TILE_OFFSET + i * PIECE_SIZE, "blue") )
 
 clock = pygame.time.Clock()
+
+i_lastClicked = -1
+j_lastClicked = -1
+sym_lastClicked = ""
+madeMove = True
 
 while True:
     clock.tick(60)
@@ -103,12 +134,38 @@ while True:
             x, y = event.pos
             for red in reds:
                 if red.rect.collidepoint(x, y):
-                    print("Clicked on red piece")
+                    print("Clicked on red piece ", red.i, red.j)
+                    i_lastClicked = red.i
+                    j_lastClicked = red.j
+                    sym_lastClicked = 'r'
             for blue in blues:
                 if blue.rect.collidepoint(x, y):
-                    print("Clicked on blue piece")
+                    print("Clicked on blue piece", blue.i, blue.j)
+                    i_lastClicked = blue.i
+                    j_lastClicked = blue.j
+                    sym_lastClicked = 'b'
+            for tile in tiles:
+                if tile.rect.collidepoint(x, y):
+                    if (tile.i == i_lastClicked and tile.j == j_lastClicked):
+                        continue
+
+                    print("Clicked on tile", tile.i, tile.j)
+
+                    if(i_lastClicked != -1 and j_lastClicked != -1 and sym_lastClicked != ""):
+                        game.move(i_lastClicked, j_lastClicked, tile.i, tile.j, sym_lastClicked)
+
+                    madeMove = True
+
+                    i_lastClicked = -1
+                    j_lastClicked = -1
+                    sym_lastClicked = ""
+
 
     # update
+    if(madeMove == True):
+        renderBoardFromState()
+        game.print()
+        madeMove = False
 
     # render
     screen.fill((190, 175, 175))
