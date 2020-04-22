@@ -24,10 +24,10 @@ class Board:
         # self.board[0] = [BLANK_SYMBOL] * 8
         # self.board[1] = [BLANK_SYMBOL] * 8
         # self.board[2] = [BLANK_SYMBOL] * 8
-        # self.board[3] = [BLANK_SYMBOL] * 8
-        # self.board[4] = [BLANK_SYMBOL] * 3 + [RED_SYMBOL] + [BLANK_SYMBOL] * 4
-        # self.board[5] = [BLANK_SYMBOL] * 8
-        # self.board[6] = [BLANK_SYMBOL] + [RED_SYMBOL] + [BLANK_SYMBOL] * 6
+        # self.board[3] = [BLANK_SYMBOL] * 4 + [RED_SYMBOL] + [BLANK_SYMBOL] * 3
+        # self.board[4] = [BLANK_SYMBOL] * 8
+        # self.board[5] = [BLANK_SYMBOL] * 2 + [RED_SYMBOL] + [BLANK_SYMBOL] * 5
+        # self.board[6] = [BLANK_SYMBOL] * 8
         # self.board[7] = [BLUE_SYMBOL] + [BLANK_SYMBOL] * 7
 
         for i in range(BOARD_SIZE):
@@ -255,14 +255,17 @@ class Board:
             self.board[endX][endY] = BLUE_KING_SYMBOL
 
         # check if turn is over
-        if (symbol == RED_SYMBOL and not self.canEatPieces(symbol, down=True)):
-            self.blue_moves = True
-        elif (symbol == RED_KING_SYMBOL and not self.canEatPieces(symbol, down=True, up=True)):
-            self.blue_moves = True
-        elif (symbol == BLUE_SYMBOL and not self.canEatPieces(symbol, up=True)):
-            self.blue_moves = False
-        elif (symbol == BLUE_KING_SYMBOL and not self.canEatPieces(symbol, down=True, up=True)):
-            self.blue_moves = False
+        if not eatingPiece:
+            self.blue_moves = not self.blue_moves
+        else:
+            if (symbol == RED_SYMBOL and not self.canEatPieces(symbol, down=True)):
+                self.blue_moves = True
+            elif (symbol == RED_KING_SYMBOL and not self.canEatPieces(symbol, down=True, up=True)):
+                self.blue_moves = True
+            elif (symbol == BLUE_SYMBOL and not self.canEatPieces(symbol, up=True)):
+                self.blue_moves = False
+            elif (symbol == BLUE_KING_SYMBOL and not self.canEatPieces(symbol, down=True, up=True)):
+                self.blue_moves = False
 
 
     def print(self):
