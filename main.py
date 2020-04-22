@@ -96,8 +96,6 @@ tiles = []
 reds = []
 blues = []
 
-blue_moves = False
-
 def renderBoardFromState():
     # clear pieces
     spr_red.empty()
@@ -151,6 +149,7 @@ i_lastClicked = -1
 j_lastClicked = -1
 sym_lastClicked = ""
 madeMove = True
+blue_moves = game.blue_moves
 
 while True:
     clock.tick(60)
@@ -218,7 +217,7 @@ while True:
         game.print()
         madeMove = False
 
-        blue_moves = not blue_moves
+        blue_moves = game.blue_moves
 
     # render
     screen.fill((190, 175, 175))

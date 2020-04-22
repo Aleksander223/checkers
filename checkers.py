@@ -19,6 +19,17 @@ class Board:
 
         self.BLANK_SYMBOL = BLANK_SYMBOL
 
+        self.blue_moves = True
+
+        # self.board[0] = [BLANK_SYMBOL] * 8
+        # self.board[1] = [BLANK_SYMBOL] * 8
+        # self.board[2] = [BLANK_SYMBOL] * 8
+        # self.board[3] = [BLANK_SYMBOL] * 8
+        # self.board[4] = [BLANK_SYMBOL] * 3 + [RED_SYMBOL] + [BLANK_SYMBOL] * 4
+        # self.board[5] = [BLANK_SYMBOL] * 8
+        # self.board[6] = [BLANK_SYMBOL] + [RED_SYMBOL] + [BLANK_SYMBOL] * 6
+        # self.board[7] = [BLUE_SYMBOL] + [BLANK_SYMBOL] * 7
+
         for i in range(BOARD_SIZE):
             for j in range(BOARD_SIZE):
                 # red
@@ -128,6 +139,15 @@ class Board:
     def move(self, startX, startY, endX, endY, symbol):
         eatingPiece = False
 
+        if (symbol not in [RED_SYMBOL, RED_KING_SYMBOL, BLUE_SYMBOL, BLUE_KING_SYMBOL]):
+            raise Exception("Invalid symbol")
+
+        if (self.blue_moves and symbol in [RED_SYMBOL, RED_KING_SYMBOL]):
+            raise Exception("Blue moves!")
+
+        if (not self.blue_moves and symbol in [BLUE_SYMBOL, BLUE_SYMBOL]):
+            raise Exception("Red moves!")
+
         if (self.board[startX][startY] != symbol):
             raise Exception("Please move a valid piece")
 
@@ -150,9 +170,6 @@ class Board:
                 # check if eating a piece
                 if (endX != startX + 2):
                     raise Exception("Illegal move")
-
-                # if not(self.isOpponent(startX + 1, startY - 1, symbol) or self.isOpponent(startX + 1, startY + 1, symbol)):
-                #     raise Exception("Illegal move")
 
                 if not(self.canEatPieceDown(startX, startY, symbol)):
                     raise Exception("Illegal move")
@@ -179,9 +196,6 @@ class Board:
                 if (endX != startX - 2):
                     raise Exception("Illegal move 1")
 
-                # if not(self.isOpponent(startX -1, startY - 1, symbol) or self.isOpponent(startX - 1, startY + 1, symbol)):
-                #     raise Exception("Illegal move")
-
                 if not(self.canEatPieceUp(startX, startY, symbol)):
                     raise Exception("Illegal move 2")
 
@@ -206,11 +220,6 @@ class Board:
                 # check if eating a piece
                 if not(endX == startX + 2 or endX == startX - 2):
                     raise Exception("Illegal move | bad X coordinate")
-
-                # check for enemies
-                # if not(self.isOpponent(startX + 1, startY - 1, symbol) or self.isOpponent(startX + 1, startY + 1, symbol)
-                #     or self.isOpponent(startX - 1, startY - 1, symbol) or self.isOpponent(startX - 1, startY + 1, symbol)):
-                #     raise Exception("Illegal move | no enemy")
 
                 if not(self.canEatPieceUp(startX, startY, symbol) or self.canEatPieceDown(startX, startY, symbol)):
                     raise Exception("Illegal move | no enemy")
@@ -244,6 +253,16 @@ class Board:
         # blue upgrade
         if (symbol == BLUE_SYMBOL and endX == 0):
             self.board[endX][endY] = BLUE_KING_SYMBOL
+
+        # check if turn is over
+        if (symbol == RED_SYMBOL and not self.canEatPieces(symbol, down=True)):
+            self.blue_moves = True
+        elif (symbol == RED_KING_SYMBOL and not self.canEatPieces(symbol, down=True, up=True)):
+            self.blue_moves = True
+        elif (symbol == BLUE_SYMBOL and not self.canEatPieces(symbol, up=True)):
+            self.blue_moves = False
+        elif (symbol == BLUE_KING_SYMBOL and not self.canEatPieces(symbol, down=True, up=True)):
+            self.blue_moves = False
 
 
     def print(self):
