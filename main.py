@@ -154,6 +154,9 @@ blue_moves = game.blue_moves
 while True:
     clock.tick(60)
 
+    if (game.checkWin(game.RED_SYMBOL) or game.checkWin(game.BLUE_SYMBOL)):
+        exit()
+
     for event in pygame.event.get():
         # quit
         if event.type == pygame.QUIT:
@@ -169,9 +172,9 @@ while True:
                     j_lastClicked = red.j
 
                     if (red.king):
-                        sym_lastClicked = 'R'
+                        sym_lastClicked = game.RED_KING_SYMBOL
                     else:
-                        sym_lastClicked = 'r'
+                        sym_lastClicked = game.RED_SYMBOL
 
             for blue in blues:
                 if blue.rect.collidepoint(x, y) and blue_moves:
@@ -180,9 +183,9 @@ while True:
                     j_lastClicked = blue.j
 
                     if (blue.king):
-                        sym_lastClicked = 'B'
+                        sym_lastClicked = game.BLUE_KING_SYMBOL
                     else:
-                        sym_lastClicked = 'b'
+                        sym_lastClicked = game.BLUE_SYMBOL
 
             for tile in tiles:
                 if tile.rect.collidepoint(x, y):

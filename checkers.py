@@ -136,6 +136,23 @@ class Board:
                 else:
                     return tuple()
 
+    def checkWin(self, symbol):
+        if (symbol == RED_SYMBOL or symbol == RED_KING_SYMBOL):
+            enemy_symbols = [BLUE_SYMBOL, BLUE_KING_SYMBOL]
+        else:
+            enemy_symbols = [RED_SYMBOL, RED_KING_SYMBOL]
+
+        flag = True
+
+        for i in range(BOARD_SIZE):
+            for sym in enemy_symbols:
+                if sym in self.board[i]:
+                    flag = False
+                    break
+
+        return flag
+
+
     def move(self, startX, startY, endX, endY, symbol):
         eatingPiece = False
 
@@ -258,13 +275,13 @@ class Board:
         if not eatingPiece:
             self.blue_moves = not self.blue_moves
         else:
-            if (symbol == RED_SYMBOL and not self.canEatPieces(symbol, down=True)):
+            if (symbol == RED_SYMBOL and not self.canEatPieceDown(endX, endY, symbol)):
                 self.blue_moves = True
-            elif (symbol == RED_KING_SYMBOL and not self.canEatPieces(symbol, down=True, up=True)):
+            elif (symbol == RED_KING_SYMBOL and not (self.canEatPieceDown(endX, endY, symbol) or self.canEatPieceUp(endX, endY, symbol))):
                 self.blue_moves = True
-            elif (symbol == BLUE_SYMBOL and not self.canEatPieces(symbol, up=True)):
+            elif (symbol == BLUE_SYMBOL and not self.canEatPieceUp(endX, endY, symbol)):
                 self.blue_moves = False
-            elif (symbol == BLUE_KING_SYMBOL and not self.canEatPieces(symbol, down=True, up=True)):
+            elif (symbol == BLUE_KING_SYMBOL and not (self.canEatPieceDown(endX, endY, symbol) or self.canEatPieceUp(endX, endY, symbol))):
                 self.blue_moves = False
 
 
