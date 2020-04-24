@@ -21,7 +21,7 @@ class State:
             return 'red'
 
     def moves(self):
-        possibleMoves = board.getMoves('b' if self.player == 'blue' else 'r')
+        possibleMoves = self.board.getMoves('b' if self.player == 'blue' else 'r')
 
         states = []
 
@@ -32,11 +32,12 @@ class State:
 
 def min_max(state):
     if (state.depth == 0 or state.board.checkWin('r') or state.board.checkWin('b')):
+        state.score = state.board.calculateScore(state.depth)
         return state
 
     state.possible_moves = state.moves()
 
-    scores = [min_max(state) for move in state.possible_moves]
+    scores = [min_max(move) for move in state.possible_moves]
 
     if state.player == 'blue':
         state.choice = max(scores, key=lambda x: x.score)

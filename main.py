@@ -1,7 +1,5 @@
 import checkers
-
-game = checkers.Board()
-humanPlayer = None
+import ai
 
 while True:
     player = input("1. Blue / 2. Red ")
@@ -14,6 +12,8 @@ while True:
     else:
         print("Invalid choice!")
         continue
+
+game = checkers.Board(humanPlayer)
 
 while True:
     gameplay = input("1. Console / 2. GUI ")
@@ -176,6 +176,8 @@ sym_lastClicked = ""
 madeMove = True
 blue_moves = game.blue_moves
 
+
+current_state = ai.State(game, game.aiPlayer, 5)
 while True:
     clock.tick(60)
 
@@ -191,7 +193,7 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             for red in reds:
-                if red.rect.collidepoint(x, y) and not blue_moves:
+                if red.rect.collidepoint(x, y) and not blue_moves and humanPlayer == 'red':
                     print("Clicked on red piece ", red.i, red.j)
                     i_lastClicked = red.i
                     j_lastClicked = red.j
@@ -202,7 +204,7 @@ while True:
                         sym_lastClicked = game.RED_SYMBOL
 
             for blue in blues:
-                if blue.rect.collidepoint(x, y) and blue_moves:
+                if blue.rect.collidepoint(x, y) and blue_moves and humanPlayer == 'blue':
                     print("Clicked on blue piece", blue.i, blue.j)
                     i_lastClicked = blue.i
                     j_lastClicked = blue.j
@@ -238,8 +240,18 @@ while True:
                     i_lastClicked = -1
                     j_lastClicked = -1
 
-
     # update
+    # ai move
+    if ((blue_moves and humanPlayer == 'red') or (not blue_moves and humanPlayer == 'blue' )):
+        current_state = ai.min_max(current_state)
+        # current_state.choice.board.print()
+        game.board = current_state.choice.board.board
+        # print(current_state.choice.player)
+        game.blue_moves = current_state.choice.board.blue_moves
+
+        madeMove = True
+        blue_moves = game.blue_moves
+
     if(madeMove == True):
         renderBoardFromState()
         game.print()
@@ -247,6 +259,8 @@ while True:
         madeMove = False
 
         blue_moves = game.blue_moves
+
+
 
     # render
     screen.fill((190, 175, 175))

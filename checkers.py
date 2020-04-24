@@ -10,7 +10,7 @@ BLUE_KING_SYMBOL = 'B'
 BLANK_SYMBOL = '.'
 
 class Board:
-    def __init__(self):
+    def __init__(self, human):
         self.board = [[ BLANK_SYMBOL for i in range(BOARD_SIZE) ] for j in range (BOARD_SIZE)]
         self.BOARD_SIZE = BOARD_SIZE
 
@@ -22,8 +22,8 @@ class Board:
 
         self.BLANK_SYMBOL = BLANK_SYMBOL
 
-        self.maximizer = 'blue'
-        self.minimizer = 'red'
+        self.humanPlayer = human
+        self.aiPlayer = 'blue' if human == 'red' else 'red'
 
         self.blue_moves = True
 
@@ -293,8 +293,9 @@ class Board:
                 elif (symbol == BLUE_KING_SYMBOL and not (self.canEatPieceDown(endX, endY, symbol) or self.canEatPieceUp(endX, endY, symbol))):
                     self.blue_moves = False
         else:
-            new_state = Board()
+            new_state = Board(self.humanPlayer)
             new_state.board = new_board
+            new_state.blue_moves = self.blue_moves
 
             # check if turn is over
             if not eatingPiece:
@@ -326,7 +327,7 @@ class Board:
                             new_move = self.move(i, j, position[0], position[1], symbol, check=True)
 
                             moves.append(new_move)
-                        except Exception:
+                        except Exception as E:
                             continue
 
         return moves
@@ -375,7 +376,7 @@ class Board:
                 print(i, "| ", sep='', end='')
 
                 for j in range(BOARD_SIZE):
-                    print(move[i][j], end=' ')
+                    print(move.board[i][j], end=' ')
                 print()
 
 
@@ -396,29 +397,35 @@ class Board:
 
 
 def console(board):
+    current_state = ai.State(board, board.aiPlayer, 5)
+
     while(True):
         board.print()
 
-        choice = input("Type quit if you want to quit, else just enter: ")
-        if choice == "quit":
-            break
+        if ((board.humanPlayer == 'blue' and board.blue_moves) or (board.humanPlayer == 'red' and not board.blue_moves)):
+            choice = input("Type quit if you want to quit, else just enter: ")
+            if choice == "quit":
+                break
 
-        print("BLUE" if board.blue_moves else "RED", "new move (i, j) -> (x, y)")
+            print("BLUE" if board.blue_moves else "RED", "new move (i, j) -> (x, y)")
 
-        try:
-            i = int(input("i: "))
-            j = int(input("j: "))
-            x = int(input("x: "))
-            y = int(input("y: "))
+            try:
+                i = int(input("i: "))
+                j = int(input("j: "))
+                x = int(input("x: "))
+                y = int(input("y: "))
 
-        except Exception as E:
-            print("Invalid format, try again\n")
-            continue
+            except Exception as E:
+                print("Invalid format, try again\n")
+                continue
 
-        try:
-            board.move(i, j, x, y, board.board[i][j])
-        except Exception as E:
-            print("Error:", E)
-
-t = Board()
-t.calculateScore(2)
+            try:
+                board.move(i, j, x, y, board.board[i][j])
+            except Exception as E:
+                print("Error:", E)
+        else:
+            current_state = ai.min_max(current_state)
+            # current_state.choice.board.print()
+            board.board = current_state.choice.board.board
+            # print(current_state.choice.player)
+            board.blue_moves = current_state.choice.board.blue_moves
