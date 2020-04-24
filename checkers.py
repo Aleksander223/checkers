@@ -36,6 +36,15 @@ class Board:
         # self.board[6] = [BLANK_SYMBOL] * 8
         # self.board[7] = [BLUE_SYMBOL] + [BLANK_SYMBOL] * 7
 
+        # self.board[0] = [RED_KING_SYMBOL] + [BLANK_SYMBOL] * 8
+        # self.board[1] = [BLANK_SYMBOL] * 8
+        # self.board[2] = [BLANK_SYMBOL] * 8
+        # self.board[3] = [BLANK_SYMBOL] * 8
+        # self.board[4] = [BLANK_SYMBOL] * 8
+        # self.board[5] = [BLANK_SYMBOL] * 8
+        # self.board[6] = [BLANK_SYMBOL] * 8
+        # self.board[7] = [BLUE_KING_SYMBOL] + [BLANK_SYMBOL] * 8
+
         for i in range(BOARD_SIZE):
             for j in range(BOARD_SIZE):
                 # red
@@ -171,6 +180,7 @@ class Board:
             raise Exception("Red moves!")
 
         if (self.board[startX][startY] != symbol):
+            # print(startX, startY, self.board[startX][startY], symbol)
             raise Exception("Please move a valid piece")
 
         if (self.board[endX][endY] != BLANK_SYMBOL):
@@ -319,12 +329,21 @@ class Board:
 
         for i in range(BOARD_SIZE):
             for j in range(BOARD_SIZE):
-                if (self.board[i][j].lower() == symbol):
+                aux = self.board[i][j]
+                if (aux.lower() == symbol):
                     positions = [(i - 2, j - 2), (i - 1, j - 1), (i - 2, j + 2), (i - 1, j + 1), (i + 2, j - 2), (i + 1, j - 1), (i + 2, j + 2), (i + 1, j + 1)]
 
                     for position in positions:
                         try:
                             new_move = self.move(i, j, position[0], position[1], symbol, check=True)
+
+                            moves.append(new_move)
+                        except Exception as E:
+                            continue
+
+                    for position in positions:
+                        try:
+                            new_move = self.move(i, j, position[0], position[1], symbol.upper(), check=True)
 
                             moves.append(new_move)
                         except Exception as E:

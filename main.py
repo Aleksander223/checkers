@@ -176,6 +176,7 @@ sym_lastClicked = ""
 madeMove = True
 blue_moves = game.blue_moves
 
+initial_frame = False
 
 current_state = ai.State(game, game.aiPlayer, 5)
 while True:
@@ -242,7 +243,7 @@ while True:
 
     # update
     # ai move
-    if ((blue_moves and humanPlayer == 'red') or (not blue_moves and humanPlayer == 'blue' )):
+    if ( initial_frame and (blue_moves and humanPlayer == 'red') or (not blue_moves and humanPlayer == 'blue' )):
         current_state = ai.min_max(current_state)
         # current_state.choice.board.print()
         game.board = current_state.choice.board.board
@@ -251,6 +252,8 @@ while True:
 
         madeMove = True
         blue_moves = game.blue_moves
+    else:
+        initial_frame = True
 
     if(madeMove == True):
         renderBoardFromState()
