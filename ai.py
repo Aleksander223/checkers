@@ -31,7 +31,7 @@ class State:
         return states
 
 def min_max(state):
-    if (state.depth == 0 or state.board.checkWin('r') or state.board.checkWin('b')):
+    if (state.depth == 0 or state.board.checkWin()):
         state.score = state.board.calculateScore(state.depth)
         return state
 
@@ -48,7 +48,7 @@ def min_max(state):
     return state
 
 def ab_pruning(alpha, beta, state):
-    if (state.depth == 0 or state.board.checkWin('r') or state.board.checkWin('b')):
+    if (state.depth == 0 or state.board.checkWin()):
         state.score = state.board.calculateScore(state.depth)
         return state
 
@@ -62,7 +62,6 @@ def ab_pruning(alpha, beta, state):
 
         for move in state.possible_moves:
             new_state = ab_pruning(alpha, beta, move)
-
 
             if current_score < new_state.score:
                 state.choice = new_state
@@ -78,7 +77,6 @@ def ab_pruning(alpha, beta, state):
         for move in state.possible_moves:
             new_state = ab_pruning(alpha, beta, move)
 
-
             if current_score > new_state.score:
                 state.choice = new_state
                 current_score = new_state.score
@@ -89,4 +87,5 @@ def ab_pruning(alpha, beta, state):
                     break
 
     state.score = state.choice.score
+
     return state

@@ -178,12 +178,12 @@ blue_moves = game.blue_moves
 
 initial_frame = False
 
-current_state = ai.State(game, game.aiPlayer, 7)
+current_state = ai.State(game, game.aiPlayer, 8)
 while True:
     clock.tick(60)
 
-    if (game.checkWin(game.RED_SYMBOL) or game.checkWin(game.BLUE_SYMBOL)):
-        exit()
+    # if (game.checkWin(game.RED_SYMBOL) or game.checkWin(game.BLUE_SYMBOL)):
+    #     print("who won")
 
     for event in pygame.event.get():
         # quit
@@ -244,7 +244,7 @@ while True:
     # update
     # ai move
     if ( initial_frame and (blue_moves and humanPlayer == 'red') or (not blue_moves and humanPlayer == 'blue' )):
-        current_state = ai.ab_pruning(-150, 150, current_state)
+        current_state = ai.ab_pruning(-500, 500, current_state)
         # current_state.choice.board.print()
         game.board = current_state.choice.board.board
         # print(current_state.choice.player)

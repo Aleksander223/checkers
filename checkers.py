@@ -136,6 +136,9 @@ class Board:
         left = (y < j)
         right = (y > j)
 
+        # if (i==5 and j == 0 and x == 3 and y == 2 and symbol == 'R'):
+        #     print(down, up, left, right)
+
         if (down):
             if (left):
                 if (self.isOpponent(i + 1, j - 1, symbol)):
@@ -160,21 +163,27 @@ class Board:
                 else:
                     return tuple()
 
-    def checkWin(self, symbol):
-        if (symbol == RED_SYMBOL or symbol == RED_KING_SYMBOL):
-            enemy_symbols = [BLUE_SYMBOL, BLUE_KING_SYMBOL]
-        else:
-            enemy_symbols = [RED_SYMBOL, RED_KING_SYMBOL]
+    def checkWin(self):
+        if (not self.getMoves('r') and not self.blue_moves):
+            return "blue"
 
-        flag = True
+        if (not self.getMoves('b') and self.blue_moves):
+            return "red"
 
-        for i in range(BOARD_SIZE):
-            for sym in enemy_symbols:
-                if sym in self.board[i]:
-                    flag = False
-                    break
-
-        return flag
+        return False
+        # if (symbol == RED_SYMBOL or symbol == RED_KING_SYMBOL):
+        #     enemy_symbols = [BLUE_SYMBOL, BLUE_KING_SYMBOL]
+        # else:
+        #     enemy_symbols = [RED_SYMBOL, RED_KING_SYMBOL]
+        #
+        # if (self.blue_moves and enemy_symbols[0] == BLUE_SYMBOL):
+        #     if self.getMoves(enemy_symbols[0]):
+        #         return True
+        # elif (not self.blue_moves and enemy_symbols[0] == RED_SYMBOL):
+        #     if self.getMoves(enemy_symbols[0]):
+        #         return True
+        #
+        # return False
 
     def move(self, startX, startY, endX, endY, symbol, check=False):
         eatingPiece = False
@@ -182,11 +191,11 @@ class Board:
         if (symbol not in [RED_SYMBOL, RED_KING_SYMBOL, BLUE_SYMBOL, BLUE_KING_SYMBOL]):
             raise Exception("Invalid symbol")
 
-        if (self.blue_moves and symbol in [RED_SYMBOL, RED_KING_SYMBOL]):
-            raise Exception("Blue moves!")
-
-        if (not self.blue_moves and symbol in [BLUE_SYMBOL, BLUE_SYMBOL]):
-            raise Exception("Red moves!")
+        # if (self.blue_moves and symbol in [RED_SYMBOL, RED_KING_SYMBOL]):
+        #     raise Exception("Blue moves!")
+        #
+        # if (not self.blue_moves and symbol in [BLUE_SYMBOL, BLUE_SYMBOL]):
+        #     raise Exception("Red moves!")
 
         if (self.board[startX][startY] != symbol):
             # print(startX, startY, self.board[startX][startY], symbol)
@@ -205,7 +214,7 @@ class Board:
             # print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
             # check if must eat piece and not eating
             if (self.canEatPieces(symbol, down=True) and not self.goingThroughPiece(startX, startY, endX, endY, symbol)):
-                raise Exception("Must eat piece")
+                raise Exception("Must eat piece 1" + symbol)
 
             if (endX != startX + 1 or not(endY == startY + 1 or endY == startY - 1)):
                 # check if eating a piece
@@ -230,18 +239,18 @@ class Board:
         elif (symbol == BLUE_SYMBOL):
             # print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
             if (self.canEatPieces(symbol, up=True) and not self.goingThroughPiece(startX, startY, endX, endY, symbol)):
-                raise Exception("Must eat piece")
+                raise Exception("Must eat piece 2", symbol)
 
             if (endX != startX - 1 or  not(endY == startY + 1 or endY == startY - 1)):
                 # check if eating a piece
                 if (endX != startX - 2):
-                    raise Exception("Illegal move 1")
+                    raise Exception("Illegal move")
 
                 if not(self.canEatPieceUp(startX, startY, symbol)):
-                    raise Exception("Illegal move 2")
+                    raise Exception("Illegal move")
 
                 if not(endY == startY - 2 or endY == startY + 2):
-                    raise Exception("Illegal move 3")
+                    raise Exception("Illegal move")
 
                 eatingPiece = True
 
@@ -255,18 +264,18 @@ class Board:
         elif (symbol == RED_KING_SYMBOL or symbol == BLUE_KING_SYMBOL):
             # print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
             if (self.canEatPieces(symbol, down=True, up=True) and not self.goingThroughPiece(startX, startY, endX, endY, symbol)):
-                raise Exception("Must eat piece")
+                raise Exception("Must eat piece 3", symbol)
 
             if (not(endX == startX + 1 or endX == startX - 1) or not(endY == startY + 1 or endY == startY - 1)):
                 # check if eating a piece
                 if not(endX == startX + 2 or endX == startX - 2):
-                    raise Exception("Illegal move | bad X coordinate")
+                    raise Exception("Illegal move")
 
                 if not(self.canEatPieceUp(startX, startY, symbol) or self.canEatPieceDown(startX, startY, symbol)):
-                    raise Exception("Illegal move | no enemy")
+                    raise Exception("Illegal move")
 
                 if not(endY == startY - 2 or endY == startY + 2):
-                    raise Exception("Illegal move | bad Y coordinate")
+                    raise Exception("Illegal move")
 
                 eatingPiece = True
 
@@ -340,19 +349,15 @@ class Board:
             for j in range(BOARD_SIZE):
                 aux = self.board[i][j]
                 if (aux.lower() == symbol):
-                    positions = [(i - 2, j - 2), (i - 1, j - 1), (i - 2, j + 2), (i - 1, j + 1), (i + 2, j - 2), (i + 1, j - 1), (i + 2, j + 2), (i + 1, j + 1)]
+                    positions = [(i - 2, j - 2), (i - 1, j - 1), (i - 2, j + 2), (i - 1, j + 1),
+                                 (i + 2, j - 2), (i + 1, j - 1), (i + 2, j + 2), (i + 1, j + 1)]
 
                     for position in positions:
                         try:
-                            new_move = self.move(i, j, position[0], position[1], symbol, check=True)
-
-                            moves.append(new_move)
-                        except Exception as E:
-                            continue
-
-                    for position in positions:
-                        try:
-                            new_move = self.move(i, j, position[0], position[1], symbol.upper(), check=True)
+                            if (aux.isupper()):
+                                new_move = self.move(i, j, position[0], position[1], symbol.upper(), check=True)
+                            else:
+                                new_move = self.move(i, j, position[0], position[1], symbol, check=True)
 
                             moves.append(new_move)
                         except Exception as E:
@@ -381,7 +386,7 @@ class Board:
         return score
 
     def calculateScore(self, depth):
-        winner = 'blue' if self.checkWin('b') else 'red' if self.checkWin('r') else None
+        winner = self.checkWin()
 
         if winner == 'blue':
             return (99 + depth)
