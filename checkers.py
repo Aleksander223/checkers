@@ -1,3 +1,6 @@
+import copy
+import ai
+
 # constants
 BOARD_SIZE = 8
 RED_SYMBOL = 'r'
@@ -18,6 +21,9 @@ class Board:
         self.BLUE_KING_SYMBOL = BLUE_KING_SYMBOL
 
         self.BLANK_SYMBOL = BLANK_SYMBOL
+
+        self.maximizer = 'blue'
+        self.minimizer = 'red'
 
         self.blue_moves = True
 
@@ -152,8 +158,7 @@ class Board:
 
         return flag
 
-
-    def move(self, startX, startY, endX, endY, symbol):
+    def move(self, startX, startY, endX, endY, symbol, check=False):
         eatingPiece = False
 
         if (symbol not in [RED_SYMBOL, RED_KING_SYMBOL, BLUE_SYMBOL, BLUE_KING_SYMBOL]):
@@ -178,7 +183,7 @@ class Board:
             raise Exception("Invalid end coordinates")
 
         if (symbol == RED_SYMBOL):
-            print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
+            # print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
             # check if must eat piece and not eating
             if (self.canEatPieces(symbol, down=True) and not self.goingThroughPiece(startX, startY, endX, endY, symbol)):
                 raise Exception("Must eat piece")
@@ -204,7 +209,7 @@ class Board:
                     eatY=  endY + 1
 
         elif (symbol == BLUE_SYMBOL):
-            print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
+            # print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
             if (self.canEatPieces(symbol, up=True) and not self.goingThroughPiece(startX, startY, endX, endY, symbol)):
                 raise Exception("Must eat piece")
 
@@ -229,7 +234,7 @@ class Board:
                     eatY=  endY + 1
 
         elif (symbol == RED_KING_SYMBOL or symbol == BLUE_KING_SYMBOL):
-            print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
+            # print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
             if (self.canEatPieces(symbol, down=True, up=True) and not self.goingThroughPiece(startX, startY, endX, endY, symbol)):
                 raise Exception("Must eat piece")
 
@@ -256,33 +261,122 @@ class Board:
                 else:
                     eatY=  endY + 1
 
+        new_board = copy.deepcopy(self.board)
 
-        self.board[endX][endY] = self.board[startX][startY]
-        self.board[startX][startY] = BLANK_SYMBOL
+        new_board[endX][endY] = new_board[startX][startY]
+        new_board[startX][startY] = BLANK_SYMBOL
 
         if (eatingPiece):
-            self.board[eatX][eatY] = BLANK_SYMBOL
+            new_board[eatX][eatY] = BLANK_SYMBOL
 
         # red upgrade
         if (symbol == RED_SYMBOL and endX == BOARD_SIZE - 1):
-            self.board[endX][endY] = RED_KING_SYMBOL
+            new_board[endX][endY] = RED_KING_SYMBOL
 
         # blue upgrade
         if (symbol == BLUE_SYMBOL and endX == 0):
-            self.board[endX][endY] = BLUE_KING_SYMBOL
+            new_board[endX][endY] = BLUE_KING_SYMBOL
 
-        # check if turn is over
-        if not eatingPiece:
-            self.blue_moves = not self.blue_moves
+        if (not check):
+            self.board = new_board
+
+            # check if turn is over
+            if not eatingPiece:
+                self.blue_moves = not self.blue_moves
+            else:
+                if (symbol == RED_SYMBOL and not self.canEatPieceDown(endX, endY, symbol)):
+                    self.blue_moves = True
+                elif (symbol == RED_KING_SYMBOL and not (self.canEatPieceDown(endX, endY, symbol) or self.canEatPieceUp(endX, endY, symbol))):
+                    self.blue_moves = True
+                elif (symbol == BLUE_SYMBOL and not self.canEatPieceUp(endX, endY, symbol)):
+                    self.blue_moves = False
+                elif (symbol == BLUE_KING_SYMBOL and not (self.canEatPieceDown(endX, endY, symbol) or self.canEatPieceUp(endX, endY, symbol))):
+                    self.blue_moves = False
         else:
-            if (symbol == RED_SYMBOL and not self.canEatPieceDown(endX, endY, symbol)):
-                self.blue_moves = True
-            elif (symbol == RED_KING_SYMBOL and not (self.canEatPieceDown(endX, endY, symbol) or self.canEatPieceUp(endX, endY, symbol))):
-                self.blue_moves = True
-            elif (symbol == BLUE_SYMBOL and not self.canEatPieceUp(endX, endY, symbol)):
-                self.blue_moves = False
-            elif (symbol == BLUE_KING_SYMBOL and not (self.canEatPieceDown(endX, endY, symbol) or self.canEatPieceUp(endX, endY, symbol))):
-                self.blue_moves = False
+            new_state = Board()
+            new_state.board = new_board
+
+            # check if turn is over
+            if not eatingPiece:
+                new_state.blue_moves = not new_state.blue_moves
+            else:
+                if (symbol == RED_SYMBOL and not new_state.canEatPieceDown(endX, endY, symbol)):
+                    new_state.blue_moves = True
+                elif (symbol == RED_KING_SYMBOL and not (new_state.canEatPieceDown(endX, endY, symbol) or new_state.canEatPieceUp(endX, endY, symbol))):
+                    new_state.blue_moves = True
+                elif (symbol == BLUE_SYMBOL and not new_state.canEatPieceUp(endX, endY, symbol)):
+                    new_state.blue_moves = False
+                elif (symbol == BLUE_KING_SYMBOL and not (new_state.canEatPieceDown(endX, endY, symbol) or new_state.canEatPieceUp(endX, endY, symbol))):
+                    new_state.blue_moves = False
+
+            return new_state
+
+
+
+    def getMoves(self, symbol):
+        moves = []
+
+        for i in range(BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                if (self.board[i][j].lower() == symbol):
+                    positions = [(i - 2, j - 2), (i - 1, j - 1), (i - 2, j + 2), (i - 1, j + 1), (i + 2, j - 2), (i + 1, j - 1), (i + 2, j + 2), (i + 1, j + 1)]
+
+                    for position in positions:
+                        try:
+                            new_move = self.move(i, j, position[0], position[1], symbol, check=True)
+
+                            moves.append(new_move)
+                        except Exception:
+                            continue
+
+        return moves
+
+    # counts pieces
+    def scoreHeuristic(self, player):
+        score = 0
+        if (player == 'blue'):
+            for i in range(BOARD_SIZE):
+                for j in range(BOARD_SIZE):
+                    if (self.board[i][j] == 'b'):
+                        score += 1
+                    elif (self.board[i][j] == 'B'):
+                        score += 2
+        else:
+            for i in range(BOARD_SIZE):
+                for j in range(BOARD_SIZE):
+                    if (self.board[i][j] == 'r'):
+                        score += 1
+                    elif (self.board[i][j] == 'R'):
+                        score += 2
+
+        return score
+
+    def calculateScore(self, depth):
+        winner = 'blue' if self.checkWin('b') else 'red' if self.checkWin('r') else None
+
+        if winner == 'blue':
+            return (99 + depth)
+        elif winner == 'red':
+            return (-99 - depth)
+        else:
+            return self.scoreHeuristic('blue') - self.scoreHeuristic('red')
+
+    def printMoves(self, symbol):
+        moves = self.getMoves(symbol)
+
+        for move in moves:
+            print("   0 1 2 3 4 5 6 7")
+            print("   ---------------")
+
+            # print board
+            for i in range(BOARD_SIZE):
+
+                # print horizontal guide
+                print(i, "| ", sep='', end='')
+
+                for j in range(BOARD_SIZE):
+                    print(move[i][j], end=' ')
+                print()
 
 
     def print(self):
@@ -300,28 +394,31 @@ class Board:
                 print(self.board[i][j], end=' ')
             print()
 
-# while(True):
-#     board.print()
-#
-#     choice = input("Type quit if you want to quit, else just enter: ")
-#     if choice == "quit":
-#         # score
-#         break
-#
-#     sym = input("Symbol: ")
-#     print(sym, "| New move (i, j) -> (x, y)")
-#
-#     try:
-#         i = int(input("i: "))
-#         j = int(input("j: "))
-#         x = int(input("x: "))
-#         y = int(input("y: "))
-#
-#     except Exception as E:
-#         print("Invalid format, try again\n")
-#         continue
-#
-#     try:
-#         board.move(i, j, x, y, sym)
-#     except Exception as E:
-#         print("Error:", E)
+
+def console(board):
+    while(True):
+        board.print()
+
+        choice = input("Type quit if you want to quit, else just enter: ")
+        if choice == "quit":
+            break
+
+        print("BLUE" if board.blue_moves else "RED", "new move (i, j) -> (x, y)")
+
+        try:
+            i = int(input("i: "))
+            j = int(input("j: "))
+            x = int(input("x: "))
+            y = int(input("y: "))
+
+        except Exception as E:
+            print("Invalid format, try again\n")
+            continue
+
+        try:
+            board.move(i, j, x, y, board.board[i][j])
+        except Exception as E:
+            print("Error:", E)
+
+t = Board()
+t.calculateScore(2)

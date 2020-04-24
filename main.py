@@ -1,6 +1,32 @@
-import pygame
 import checkers
 
+game = checkers.Board()
+humanPlayer = None
+
+while True:
+    player = input("1. Blue / 2. Red ")
+    if (int(player) == 1):
+        humanPlayer = 'blue'
+        break
+    elif (int(player) == 2):
+        humanPlayer = 'red'
+        break
+    else:
+        print("Invalid choice!")
+        continue
+
+while True:
+    gameplay = input("1. Console / 2. GUI ")
+
+    if int(gameplay) == 1:
+        checkers.console(game)
+    elif int(gameplay) == 2:
+        break
+    else:
+        print("Invalid choice!")
+        continue
+
+import pygame
 pygame.init()
 
 screen = pygame.display.set_mode((800, 600))
@@ -91,7 +117,6 @@ class Piece(pygame.sprite.Sprite):
 
 # board init
 # logic board
-game = checkers.Board()
 tiles = []
 reds = []
 blues = []
@@ -218,6 +243,7 @@ while True:
     if(madeMove == True):
         renderBoardFromState()
         game.print()
+        # game.printMoves(game.BLUE_SYMBOL if game.blue_moves else game.RED_SYMBOL)
         madeMove = False
 
         blue_moves = game.blue_moves
