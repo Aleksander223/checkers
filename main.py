@@ -178,7 +178,7 @@ blue_moves = game.blue_moves
 
 initial_frame = False
 
-current_state = ai.State(game, game.aiPlayer, 5)
+current_state = ai.State(game, game.aiPlayer, 7)
 while True:
     clock.tick(60)
 
@@ -244,7 +244,7 @@ while True:
     # update
     # ai move
     if ( initial_frame and (blue_moves and humanPlayer == 'red') or (not blue_moves and humanPlayer == 'blue' )):
-        current_state = ai.min_max(current_state)
+        current_state = ai.ab_pruning(-150, 150, current_state)
         # current_state.choice.board.print()
         game.board = current_state.choice.board.board
         # print(current_state.choice.player)

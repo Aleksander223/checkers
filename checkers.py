@@ -36,7 +36,7 @@ class Board:
         # self.board[6] = [BLANK_SYMBOL] * 8
         # self.board[7] = [BLUE_SYMBOL] + [BLANK_SYMBOL] * 7
 
-        # self.board[0] = [RED_KING_SYMBOL] + [BLANK_SYMBOL] * 8
+        # self.board[0] =  [BLANK_SYMBOL] * 7 + [RED_KING_SYMBOL]
         # self.board[1] = [BLANK_SYMBOL] * 8
         # self.board[2] = [BLANK_SYMBOL] * 8
         # self.board[3] = [BLANK_SYMBOL] * 8
@@ -45,22 +45,31 @@ class Board:
         # self.board[6] = [BLANK_SYMBOL] * 8
         # self.board[7] = [BLUE_KING_SYMBOL] + [BLANK_SYMBOL] * 8
 
-        for i in range(BOARD_SIZE):
-            for j in range(BOARD_SIZE):
-                # red
-                if (i == 0 or i == 2):
-                    if (j % 2 == 1):
-                        self.board[i][j] = RED_SYMBOL
-                elif (i == 1):
-                    if (j % 2 == 0):
-                        self.board[i][j] = RED_SYMBOL
-                # blue
-                elif (i == 5 or i == 7):
-                    if (j % 2 == 0):
-                        self.board[i][j] = BLUE_SYMBOL
-                elif (i == 6):
-                    if (j % 2 == 1):
-                        self.board[i][j] = BLUE_SYMBOL
+        self.board[0] = [BLANK_SYMBOL] * 7 + ['r']
+        self.board[1] = [BLANK_SYMBOL] * 4 + ['r'] + [BLANK_SYMBOL] * 3
+        self.board[2] = [BLANK_SYMBOL, 'r'] * 4
+        self.board[3] = ['r'] + [BLANK_SYMBOL] * 3 + ['r'] + [BLANK_SYMBOL] * 3
+        self.board[4] = [BLANK_SYMBOL] * 5 + ['b'] + [BLANK_SYMBOL] + ['b']
+        self.board[5] = ['R'] + [BLANK_SYMBOL] + ['b'] + [BLANK_SYMBOL] + ['r'] + [BLANK_SYMBOL] + ['b'] + [BLANK_SYMBOL]
+        self.board[6] = [BLANK_SYMBOL] * 3 + ['b'] + [BLANK_SYMBOL] * 3 + ['r']
+        self.board[7] = [BLANK_SYMBOL] * 8
+
+        # for i in range(BOARD_SIZE):
+        #     for j in range(BOARD_SIZE):
+        #         # red
+        #         if (i == 0 or i == 2):
+        #             if (j % 2 == 1):
+        #                 self.board[i][j] = RED_SYMBOL
+        #         elif (i == 1):
+        #             if (j % 2 == 0):
+        #                 self.board[i][j] = RED_SYMBOL
+        #         # blue
+        #         elif (i == 5 or i == 7):
+        #             if (j % 2 == 0):
+        #                 self.board[i][j] = BLUE_SYMBOL
+        #         elif (i == 6):
+        #             if (j % 2 == 1):
+        #                 self.board[i][j] = BLUE_SYMBOL
 
     def inBounds(self, i, j):
         return (i >= 0 and j >= 0 and i < BOARD_SIZE and j < BOARD_SIZE)
