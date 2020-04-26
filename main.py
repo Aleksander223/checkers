@@ -95,6 +95,7 @@ red_text = font.render('RED moves', True, (234, 43, 31))
 red_rect = red_text.get_rect()
 red_rect = (300, 20)
 
+
 # classes
 class Tile(pygame.sprite.Sprite):
     def __init__(self, x, y, color, i, j):
@@ -192,6 +193,10 @@ madeMove = True
 blue_moves = game.blue_moves
 
 initial_frame = False
+
+human_before = None
+ai_before = None
+human_time = None
 
 current_state = ai.State(game, game.aiPlayer, max_depth)
 while True:
@@ -317,10 +322,14 @@ while True:
     # update
     # ai move
     if ( initial_frame and (blue_moves and humanPlayer == 'red') or (not blue_moves and humanPlayer == 'blue' )):
+        ai_before = int(round(time.time() * 1000))
+
         if (algo == 1):
             current_state = ai.min_max(current_state)
         else:
             current_state = ai.ab_pruning(-1000, +1000, current_state)
+
+        ai_after = int(round(time.time() * 1000))
 
         game.board = current_state.choice.board.board
         game.blue_moves = current_state.choice.board.blue_moves
@@ -331,11 +340,25 @@ while True:
         initial_frame = True
 
     if(madeMove == True):
+        if (humanPlayer == 'blue' and blue_moves):
+            human_after = int(round(time.time() * 1000))
+        elif (humanPlayer == 'red' and not blue_moves):
+            human_after = int(round(time.time() * 1000))
+
+        if human_before:
+            human_time = str(human_after - human_before)
+            human_before = None
+
         renderBoardFromState()
         game.print()
         madeMove = False
 
         blue_moves = game.blue_moves
+
+        if (humanPlayer == 'blue' and blue_moves):
+            human_before = int(round(time.time() * 1000))
+        elif (humanPlayer == 'red' and not blue_moves):
+            human_before = int(round(time.time() * 1000))
 
 
 
@@ -351,5 +374,17 @@ while True:
         screen.blit(blue_text, blue_rect)
     else:
         screen.blit(red_text, red_rect)
+
+    if (human_time):
+        time_text = font.render("Human: " + human_time + " ms", True, (0, 0, 0))
+        time_rect = time_text.get_rect()
+        time_rect = (550, 20)
+        screen.blit(time_text, time_rect)
+
+    if (ai_before):
+        time_text = font.render("AI: " + str(ai_after - ai_before) + " ms", True, (0, 0, 0))
+        time_rect = time_text.get_rect()
+        time_rect = (550, 50)
+        screen.blit(time_text, time_rect)
 
     pygame.display.flip()
