@@ -1,5 +1,7 @@
 import copy
 import ai
+import time
+
 
 # constants
 BOARD_SIZE = 8
@@ -10,6 +12,9 @@ BLUE_KING_SYMBOL = 'B'
 BLANK_SYMBOL = '.'
 
 class Board:
+    DRAW_COUNTER = 0 # turns without attacking
+    DRAW_MOVES = 20
+
     def __init__(self, human):
         self.board = [[ BLANK_SYMBOL for i in range(BOARD_SIZE) ] for j in range (BOARD_SIZE)]
         self.BOARD_SIZE = BOARD_SIZE
@@ -26,33 +31,6 @@ class Board:
         self.aiPlayer = 'blue' if human == 'red' else 'red'
 
         self.blue_moves = True
-
-        # self.board[0] = [BLANK_SYMBOL] * 8
-        # self.board[1] = [BLANK_SYMBOL] * 8
-        # self.board[2] = [BLANK_SYMBOL] * 8
-        # self.board[3] = [BLANK_SYMBOL] * 4 + [RED_SYMBOL] + [BLANK_SYMBOL] * 3
-        # self.board[4] = [BLANK_SYMBOL] * 8
-        # self.board[5] = [BLANK_SYMBOL] * 2 + [RED_SYMBOL] + [BLANK_SYMBOL] * 5
-        # self.board[6] = [BLANK_SYMBOL] * 8
-        # self.board[7] = [BLUE_SYMBOL] + [BLANK_SYMBOL] * 7
-
-        # self.board[0] =  [BLANK_SYMBOL] * 7 + [RED_KING_SYMBOL]
-        # self.board[1] = [BLANK_SYMBOL] * 8
-        # self.board[2] = [BLANK_SYMBOL] * 8
-        # self.board[3] = [BLANK_SYMBOL] * 8
-        # self.board[4] = [BLANK_SYMBOL] * 8
-        # self.board[5] = [BLANK_SYMBOL] * 8
-        # self.board[6] = [BLANK_SYMBOL] * 8
-        # self.board[7] = [BLUE_KING_SYMBOL] + [BLANK_SYMBOL] * 8
-
-        # self.board[0] = [BLANK_SYMBOL] * 7 + ['r']
-        # self.board[1] = [BLANK_SYMBOL] * 4 + ['r'] + [BLANK_SYMBOL] * 3
-        # self.board[2] = [BLANK_SYMBOL, 'r'] * 4
-        # self.board[3] = ['r'] + [BLANK_SYMBOL] * 3 + ['r'] + [BLANK_SYMBOL] * 3
-        # self.board[4] = [BLANK_SYMBOL] * 5 + ['b'] + [BLANK_SYMBOL] + ['b']
-        # self.board[5] = ['R'] + [BLANK_SYMBOL] + ['b'] + [BLANK_SYMBOL] + ['r'] + [BLANK_SYMBOL] + ['b'] + [BLANK_SYMBOL]
-        # self.board[6] = [BLANK_SYMBOL] * 3 + ['b'] + [BLANK_SYMBOL] * 3 + ['r']
-        # self.board[7] = [BLANK_SYMBOL] * 8
 
         for i in range(BOARD_SIZE):
             for j in range(BOARD_SIZE):
@@ -116,11 +94,13 @@ class Board:
 
         for i in range(BOARD_SIZE):
             for j in range(BOARD_SIZE):
-                if (self.board[i][j].lower() == symbol or self.board[i][j].upper() == symbol):
-                    if (symbol.isupper()):
+                aux = self.board[i][j]
+                if (aux.lower() == symbol or aux.upper() == symbol):
+                    if (symbol.isupper() and self.board[i][j].isupper()):
                         pieces += (self.canEatPieceDown(i, j, symbol))
                         pieces += (self.canEatPieceUp(i, j, symbol))
-                    else:
+
+                    elif (symbol.islower() and self.board[i][j].islower()):
                         if (down):
                             pieces += (self.canEatPieceDown(i, j, symbol))
 
@@ -135,9 +115,6 @@ class Board:
 
         left = (y < j)
         right = (y > j)
-
-        # if (i==5 and j == 0 and x == 3 and y == 2 and symbol == 'R'):
-        #     print(down, up, left, right)
 
         if (down):
             if (left):
@@ -164,6 +141,9 @@ class Board:
                     return tuple()
 
     def checkWin(self):
+        if (Board.DRAW_COUNTER >= Board.DRAW_MOVES):
+            return "draw"
+
         if (not self.getMoves('r') and not self.blue_moves):
             return "blue"
 
@@ -171,31 +151,12 @@ class Board:
             return "red"
 
         return False
-        # if (symbol == RED_SYMBOL or symbol == RED_KING_SYMBOL):
-        #     enemy_symbols = [BLUE_SYMBOL, BLUE_KING_SYMBOL]
-        # else:
-        #     enemy_symbols = [RED_SYMBOL, RED_KING_SYMBOL]
-        #
-        # if (self.blue_moves and enemy_symbols[0] == BLUE_SYMBOL):
-        #     if self.getMoves(enemy_symbols[0]):
-        #         return True
-        # elif (not self.blue_moves and enemy_symbols[0] == RED_SYMBOL):
-        #     if self.getMoves(enemy_symbols[0]):
-        #         return True
-        #
-        # return False
 
     def move(self, startX, startY, endX, endY, symbol, check=False):
         eatingPiece = False
 
         if (symbol not in [RED_SYMBOL, RED_KING_SYMBOL, BLUE_SYMBOL, BLUE_KING_SYMBOL]):
             raise Exception("Invalid symbol")
-
-        # if (self.blue_moves and symbol in [RED_SYMBOL, RED_KING_SYMBOL]):
-        #     raise Exception("Blue moves!")
-        #
-        # if (not self.blue_moves and symbol in [BLUE_SYMBOL, BLUE_SYMBOL]):
-        #     raise Exception("Red moves!")
 
         if (self.board[startX][startY] != symbol):
             # print(startX, startY, self.board[startX][startY], symbol)
@@ -214,7 +175,7 @@ class Board:
             # print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
             # check if must eat piece and not eating
             if (self.canEatPieces(symbol, down=True) and not self.goingThroughPiece(startX, startY, endX, endY, symbol)):
-                raise Exception("Must eat piece 1" + symbol)
+                raise Exception("Must eat piece")
 
             if (endX != startX + 1 or not(endY == startY + 1 or endY == startY - 1)):
                 # check if eating a piece
@@ -239,7 +200,7 @@ class Board:
         elif (symbol == BLUE_SYMBOL):
             # print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
             if (self.canEatPieces(symbol, up=True) and not self.goingThroughPiece(startX, startY, endX, endY, symbol)):
-                raise Exception("Must eat piece 2", symbol)
+                raise Exception("Must eat piece")
 
             if (endX != startX - 1 or  not(endY == startY + 1 or endY == startY - 1)):
                 # check if eating a piece
@@ -264,7 +225,7 @@ class Board:
         elif (symbol == RED_KING_SYMBOL or symbol == BLUE_KING_SYMBOL):
             # print(self.canEatPieces(symbol, up=True), self.goingThroughPiece(startX, startY, endX, endY, symbol))
             if (self.canEatPieces(symbol, down=True, up=True) and not self.goingThroughPiece(startX, startY, endX, endY, symbol)):
-                raise Exception("Must eat piece 3", symbol)
+                raise Exception("Must eat piece")
 
             if (not(endX == startX + 1 or endX == startX - 1) or not(endY == startY + 1 or endY == startY - 1)):
                 # check if eating a piece
@@ -311,7 +272,11 @@ class Board:
             # check if turn is over
             if not eatingPiece:
                 self.blue_moves = not self.blue_moves
+
+                Board.DRAW_COUNTER += 1
             else:
+                Board.DRAW_COUNTER = 0
+
                 if (symbol == RED_SYMBOL and not self.canEatPieceDown(endX, endY, symbol)):
                     self.blue_moves = True
                 elif (symbol == RED_KING_SYMBOL and not (self.canEatPieceDown(endX, endY, symbol) or self.canEatPieceUp(endX, endY, symbol))):
@@ -365,7 +330,7 @@ class Board:
 
         return moves
 
-    # counts pieces
+    # counts pieces with weight
     def scoreHeuristic(self, player):
         score = 0
         if (player == 'blue'):
@@ -385,6 +350,26 @@ class Board:
 
         return score
 
+    # only count pieces
+    def scoreHeuristic2(self, player):
+        score = 0
+        if (player == 'blue'):
+            for i in range(BOARD_SIZE):
+                for j in range(BOARD_SIZE):
+                    if (self.board[i][j] == 'b'):
+                        score += 1
+                    elif (self.board[i][j] == 'B'):
+                        score += 1
+        else:
+            for i in range(BOARD_SIZE):
+                for j in range(BOARD_SIZE):
+                    if (self.board[i][j] == 'r'):
+                        score += 1
+                    elif (self.board[i][j] == 'R'):
+                        score += 1
+
+        return score
+
     def calculateScore(self, depth):
         winner = self.checkWin()
 
@@ -392,6 +377,8 @@ class Board:
             return (99 + depth)
         elif winner == 'red':
             return (-99 - depth)
+        elif winner == 'draw':
+            return 0
         else:
             return self.scoreHeuristic('blue') - self.scoreHeuristic('red')
 
@@ -429,18 +416,47 @@ class Board:
             print()
 
 
-def console(board):
-    current_state = ai.State(board, board.aiPlayer, 5)
+
+def console(board, algorithm, maximum_depth):
+    current_state = ai.State(board, board.aiPlayer, maximum_depth)
+    timerStarted = False
+
 
     while(True):
         board.print()
 
+        if (board.checkWin()):
+            if (board.checkWin() == 'draw'):
+                print("Draw!")
+                print("Blue score:", board.scoreHeuristic("blue"))
+                print("Red score:", board.scoreHeuristic("red"))
+                break
+
+            if (board.checkWin() == 'red'):
+                print("Red wins!")
+                print("Blue score:", board.scoreHeuristic("blue"))
+                print("Red score:", board.scoreHeuristic("red"))
+                break
+
+            if (board.checkWin() == 'blue'):
+                print("Blue wins!")
+                print("Blue score:", board.scoreHeuristic("blue"))
+                print("Red score:", board.scoreHeuristic("red"))
+                break
+
         if ((board.humanPlayer == 'blue' and board.blue_moves) or (board.humanPlayer == 'red' and not board.blue_moves)):
             choice = input("Type quit if you want to quit, else just enter: ")
             if choice == "quit":
+                print("Blue score:", board.scoreHeuristic("blue"))
+                print("Red score:", board.scoreHeuristic("red"))
                 break
 
-            print("BLUE" if board.blue_moves else "RED", "new move (i, j) -> (x, y)")
+
+            print("BLUE" if board.blue_moves else "RED", "moves")
+            print("new move (i, j) -> (x, y)")
+            if (not timerStarted):
+                timerStarted = True
+                t_before = int(round(time.time() * 1000))
 
             try:
                 i = int(input("i: "))
@@ -456,9 +472,23 @@ def console(board):
                 board.move(i, j, x, y, board.board[i][j])
             except Exception as E:
                 print("Error:", E)
+
+            t_after = int(round(time.time() * 1000))
+            timerStarted = False
+
+            print("Human thought for:", str(t_after - t_before), "miliseconds")
         else:
-            current_state = ai.min_max(current_state)
-            # current_state.choice.board.print()
+            print("BLUE" if board.blue_moves else "RED", "moves")
+            t_before = int(round(time.time() * 1000))
+
+            if (algorithm == 1):
+                current_state = ai.min_max(current_state)
+            else:
+                current_state = ai.ab_pruning(-1000, +1000, current_state)
+
+            t_after = int(round(time.time() * 1000))
+
+            print("AI thought for:", str(t_after - t_before), "miliseconds")
+
             board.board = current_state.choice.board.board
-            # print(current_state.choice.player)
             board.blue_moves = current_state.choice.board.blue_moves

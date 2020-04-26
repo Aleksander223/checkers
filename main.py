@@ -1,5 +1,7 @@
 import checkers
 import ai
+import time
+
 
 while True:
     player = input("1. Blue / 2. Red ")
@@ -13,13 +15,41 @@ while True:
         print("Invalid choice!")
         continue
 
+while True:
+    algorithm = input("1. MinMax / 2. AB Pruning ")
+    if (int(algorithm) == 1):
+        algo = 1
+        break
+    elif (int(algorithm) == 2):
+        algo = 2
+        break
+    else:
+        print("Invalid choice!")
+        continue
+
+while True:
+    difficulty = input("1. Easy / 2. Medium / 3. Hard ")
+    if (int(difficulty) == 1):
+        max_depth = 2
+        break
+    elif (int(difficulty) == 2):
+        max_depth = 4
+        break
+    elif (int(difficulty) == 3):
+        max_depth = 6
+        break
+    else:
+        print("Invalid choice!")
+        continue
+
 game = checkers.Board(humanPlayer)
 
 while True:
     gameplay = input("1. Console / 2. GUI ")
 
     if int(gameplay) == 1:
-        checkers.console(game)
+        checkers.console(game, algo, max_depth)
+        exit()
     elif int(gameplay) == 2:
         break
     else:
@@ -153,21 +183,6 @@ for i in range(8):
     # to stagger the tiles
     white = not white
 
-# # pieces
-# # red
-#
-# for i in range(3):
-#     for j in range(8):
-#         if (i % 2 != j % 2):
-#
-#
-# # blue
-#
-# for i in range(5, 8):
-#     for j in range(8):
-#         if (i % 2 != j % 2):
-
-
 clock = pygame.time.Clock()
 
 i_lastClicked = -1
@@ -178,16 +193,74 @@ blue_moves = game.blue_moves
 
 initial_frame = False
 
-current_state = ai.State(game, game.aiPlayer, 7)
+current_state = ai.State(game, game.aiPlayer, max_depth)
 while True:
     clock.tick(60)
 
-    # if (game.checkWin(game.RED_SYMBOL) or game.checkWin(game.BLUE_SYMBOL)):
-    #     print("who won")
+    if (game.checkWin()):
+        screen.fill((190, 175, 175))
+        renderBoardFromState()
+
+        if (game.checkWin() == 'red'):
+            red_text = font.render('RED wins!', True, (234, 43, 31))
+            red_rect = red_text.get_rect()
+            red_rect = (300, 20)
+            screen.blit(red_text, red_rect)
+        elif (game.checkWin() == 'blue'):
+            blue_text = font.render('BLUE wins!', True, (41, 88, 170))
+            blue_rect = red_text.get_rect()
+            blue_rect = (300, 20)
+            screen.blit(blue_text, blue_rect)
+        else:
+            error_text = font.render('Draw!', True, (0, 0, 0))
+            error_rect = red_text.get_rect()
+            error_rect = (300, 20)
+            screen.blit(error_text, error_rect)
+
+        red_score = font.render('RED: ' + str(game.scoreHeuristic('red')) , True, (234, 43, 31))
+        blue_score = font.render('BLUE: ' + str(game.scoreHeuristic('blue')) , True, (41, 88, 170))
+
+        red_score_rect = red_score.get_rect()
+        red_score_rect = (650, 100)
+
+        blue_score_rect = blue_score.get_rect()
+        blue_score_rect = (650, 160)
+
+        screen.blit(red_score, red_score_rect)
+        screen.blit(blue_score, blue_score_rect)
+
+        spr_tiles.draw(screen)
+        spr_red.draw(screen)
+        spr_blue.draw(screen)
+
+        pygame.display.flip()
+        time.sleep(3)
+        exit()
 
     for event in pygame.event.get():
         # quit
         if event.type == pygame.QUIT:
+            screen.fill((190, 175, 175))
+            renderBoardFromState()
+
+            red_score = font.render('RED: ' + str(game.scoreHeuristic('red')) , True, (234, 43, 31))
+            blue_score = font.render('BLUE: ' + str(game.scoreHeuristic('blue')) , True, (41, 88, 170))
+
+            red_score_rect = red_score.get_rect()
+            red_score_rect = (650, 100)
+
+            blue_score_rect = blue_score.get_rect()
+            blue_score_rect = (650, 160)
+
+            screen.blit(red_score, red_score_rect)
+            screen.blit(blue_score, blue_score_rect)
+
+            spr_tiles.draw(screen)
+            spr_red.draw(screen)
+            spr_blue.draw(screen)
+
+            pygame.display.flip()
+            time.sleep(3)
             exit()
 
         # mouse
@@ -244,10 +317,12 @@ while True:
     # update
     # ai move
     if ( initial_frame and (blue_moves and humanPlayer == 'red') or (not blue_moves and humanPlayer == 'blue' )):
-        current_state = ai.ab_pruning(-1000, +1000, current_state)
-        # current_state.choice.board.print()
+        if (algo == 1):
+            current_state = ai.min_max(current_state)
+        else:
+            current_state = ai.ab_pruning(-1000, +1000, current_state)
+
         game.board = current_state.choice.board.board
-        # print(current_state.choice.player)
         game.blue_moves = current_state.choice.board.blue_moves
 
         madeMove = True
@@ -258,7 +333,6 @@ while True:
     if(madeMove == True):
         renderBoardFromState()
         game.print()
-        # game.printMoves(game.BLUE_SYMBOL if game.blue_moves else game.RED_SYMBOL)
         madeMove = False
 
         blue_moves = game.blue_moves
